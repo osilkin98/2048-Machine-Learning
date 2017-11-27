@@ -2,7 +2,7 @@
 #define GRID_H
 #include <vector>
 #include <iostream>
-#include "tile.cpp"
+#include "tile.h"
 
 class Grid {
  private:
@@ -47,9 +47,11 @@ class Grid {
   //bool shift_elem(ssize_t dx, ssize_t dy);
 
   void unmerge(void);
-  bool take_turn(const char c);
+  bool take_turn(const char);
   void place_tile(void);
-  
+  size_t board_size(void) const {
+    return board.size();
+  }
   bool shift_left(void);
   bool shift_right(void);
   bool shift_up(void);

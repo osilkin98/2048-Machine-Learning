@@ -9,6 +9,7 @@
 
 bool Grid::play_game(void) {
   while(this -> has_merge()) {
+    
     std::cout << "score: " << score << std::endl;
     this -> print(std::cout);
     std::cout << "swipe a direction: " << std::flush;
@@ -20,8 +21,15 @@ bool Grid::play_game(void) {
       this -> place_tile();
     } else {
       std::cout << "there are no swipes that way" << std::endl;
+      }
+    this -> print(std::cout);
+    /*short x = rand() % 4;
+    while(!(this -> take_turn(x))){
+      x = rand() % 4;
     }
+    this -> place_tile();*/
   }
+  
   return true;
 }
 
@@ -29,9 +37,6 @@ bool Grid::play_game(void) {
 
 
 Grid::Grid(void) : board(4, std::vector<Tile*>(4)), active_tiles(0), score(0) {
-  std::cerr << "Vector has successfully intialized: rows"
-	    << board.size() << "\ncols: "
-	    << board[0].size() << "\n";
   board_init();
 }
 
@@ -63,7 +68,6 @@ void Grid::board_init(void) {
   srand(time(0));
   this -> place_tile();
   this -> place_tile();
-  std::cerr << "the board has been successfullly initialized!\n";
 }
 
 
@@ -86,9 +90,6 @@ bool Grid::take_turn(const char c) {
 Grid::Grid(const size_t board_size)
   : board(board_size, std::vector<Tile*>(board_size)),
     active_tiles(0), score(0) {
-  std::cerr << "Vector has successfully initialized\n"
-	    << "rows: " << board.size()
-	    << "\ncols: " << board[0].size() << "\n";
   board_init();
 }
 
@@ -101,7 +102,7 @@ Grid::~Grid(void) {
       board[i][j] = NULL;
     }
   }
-  std::cerr << "all the pointers on the board have been deallocated\n";
+  //std::cerr << "all the pointers on the board have been deallocated\n";
 }
 /*
 unsigned long Grid::board_sum(void) const {
@@ -312,36 +313,38 @@ bool Grid::has_shift(void) const {
 
 bool Grid::check_right(size_t i, size_t j) const {
   bool x = false;
-  if(j < board[i].size() - 1) {
-    x = check_right(i, j+1);
+  if(j < board.size() - 1) {
+    x = check_right(i, j+1) ||
+      (*board[i][j] == *board[i][j+1] &&
+       !(board[i][j] -> is_merged()) &&
+       !(board[i][j+1] -> is_merged()));
+    if(i < board.size() - 1) {
+      x = x || (*board[i][j] == *board[i+1][j] &&
+		!(board[i][j] -> is_merged()) &&
+		!(board[i+1][j] -> is_merged()));
+    }
   } else {
-    std::cerr << "checking board[" << i << "][" << j << "] with "
-	      << "board[" << i+1 << "][" << j<<  "]\n";
-    return *board[i][j] == *board[i+1][j] &&
-      !(board[i][j] -> is_merged()) &&
-      !(board[i+1][j] -> is_merged());
+    if(i < board.size() - 1) {
+      x = x || (*board[i][j] == *board[i+1][j] &&
+		!(board[i][j] -> is_merged()) &&
+		!(board[i+1][j] -> is_merged()));
+    }
   }
-  std::cerr << "checking board[" << i << "][" << j << "] with "
-	    << "board[" << i+1 << "][" << j << "] and board[" 
-	    << i << "][" << j << "]\n";
-  return x || (!(board[i][j] -> is_merged()) &&
-	    ( !(board[i+1][j] -> is_merged()) ||
-	      !(board[i][j+1] -> is_merged()) )) &&
-	    (*board[i][j] == *board[i+1][j] ||
-	     *board[i][j] == *board[i][j+1]);
+  return x;
 }
 
 bool Grid::check_down(size_t i, size_t j) const {
-  bool x = false;
-  if(i < board.size() - 2) {
+  bool x = false, y = false;
+  if(i < board.size() - 1) {
     x = check_down(i+1, j);
+    y = *board[i][j] == *board[i+1][j] &&
+      !(board[i][j] -> is_merged()) &&
+      !(board[i+1][j] -> is_merged());
+  } else if(i == board.size() - 1) {
+    x = check_right(i, j);
   }
-  x = x || check_right(i, j+1);
-  std::cerr << "checking board[" << i << "][" << j << "] with "
-	    << "board[" << i+1 << "][" << j << "]\n";
-  return x || *board[i][j] == *board[i+1][j] &&
-    !(board[i][j] -> is_merged()) &&
-    !(board[i+1][j] -> is_merged());
+  x = x || check_right(i, j);
+  return x || y;
 }
 
 
@@ -364,9 +367,11 @@ bool Grid::has_merge(void) const {
   }
 }
 
-
+/*
 int main(void) {
-  Grid gr;
-  gr.play_game();
+  Grid* gr = NULL;
+  gr = new Grid;
+  gr -> play_game();
   return 0;
-}
+  }*/
+
