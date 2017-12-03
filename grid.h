@@ -47,7 +47,8 @@ class Grid {
   //bool shift_elem(ssize_t dx, ssize_t dy);
 
   void unmerge(void);
-  bool take_turn(const char);
+  bool take_turn(const short);
+  void place_tile(const short);
   void place_tile(void);
   size_t board_size(void) const {
     return board.size();

@@ -5,6 +5,8 @@
 // this constructor will be used always
 Tile::Tile(void) : value((rand() % 2) + 1){ }
 
+Tile::Tile(const unsigned long val) : value(val) { }
+
 Tile::Tile(const Tile & other) : value(other.value),
 				 merged(other.merged) { }
 

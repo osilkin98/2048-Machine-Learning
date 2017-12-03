@@ -11,7 +11,8 @@ class Tile {
   
   Tile(const Tile & other); // copy ctor
 
-
+  Tile(const unsigned long val);
+  
   /*** MUTATORS ***/
   
   Tile& operator++(void);

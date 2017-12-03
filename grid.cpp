@@ -41,20 +41,26 @@ Grid::Grid(void) : board(4, std::vector<Tile*>(4)), active_tiles(0), score(0) {
 }
 
 void Grid::place_tile(void) {
+  place_tile(static_cast<double>(rand()) /
+	     static_cast<double>(RAND_MAX) <= 0.25 ?
+	     4 : 2);
+}
+
+void Grid::place_tile(const short value) {
   short counter = 0;
   for(size_t i = 0; i < board.size(); ++i) {
     for(size_t j = 0; j < board[i].size(); ++j) {
       if(board[i][j] == NULL) {
 	++counter;
 	if(board.size()*board.size() - active_tiles == counter) {
-	  board[i][j] = new Tile;
+	  board[i][j] = new Tile(value);
 	  ++(*board[i][j]);
 	  ++active_tiles;
 	  return;
 	} else if(static_cast<double>(rand())/static_cast<double>(RAND_MAX)
 	   <= (1/static_cast<double>(board.size()*board.size() -
 				  active_tiles))) {
-	  board[i][j] = new Tile;
+	  board[i][j] = new Tile(value);
 	  ++(*board[i][j]);
 	  ++active_tiles;
 	  return;
@@ -71,15 +77,15 @@ void Grid::board_init(void) {
 }
 
 
-bool Grid::take_turn(const char c) {
+bool Grid::take_turn(const short c) {
   switch(c) {
-  case 'a':
+  case 0:
     return this -> shift_left();
-  case 'd':
+  case 1:
     return this -> shift_right();
-  case 's':
+  case 2:
     return this -> shift_down();
-  case 'w':
+  case 3:
     return this -> shift_up();
   default:
     std::cerr << "somehow we ended up in the default case!\n";
