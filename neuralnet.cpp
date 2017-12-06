@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include <random>
 
-#define RAND_CONST 0.15
+#define RAND_CONST 0.015
 
 NeuralNet::NeuralNet(void)
   : fitness(1), input_layer(16),
@@ -146,7 +146,7 @@ void NeuralNet::initialize(bool is_new = true) {
   if(is_new) {
     this -> mutate(1.0);
   } else {
-    this -> mutate(0.15);
+    this -> mutate(RAND_CONST);
   }
   
   for(size_t i = 0; i < input_layer.size(); ++i){
