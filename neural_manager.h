@@ -57,6 +57,8 @@ class GeneticAlgorithm {
   void print_scores(void) const;
   bool play_game(NeuralNet * & test_net,
 		 Grid * & game, const size_t i);
+  void sort_population(void);
+  void evaluate_fitness(void);
   
   bool train(void);
 };

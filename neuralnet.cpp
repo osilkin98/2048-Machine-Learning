@@ -4,32 +4,36 @@
 #include <random>
 
 #define RAND_CONST 0.015
+#define LAYER_1 16
+#define LAYER_2 12
+#define LAYER_3 8
+#define LAYER_4 4
 
 NeuralNet::NeuralNet(void)
-  : fitness(1), input_layer(16),
-    hidden_layer1(12), hidden_layer2(8),
-    output_layer(4),
-    weights_l12(16, std::vector<double long>(12)),
-    weights_l23(12, std::vector<double long>(8)),
-    weights_l34(8, std::vector<double long>(4)),
-    bias_l12(12), bias_l23(8), bias_l34(4) {
+  : fitness(1), input_layer(LAYER_1),
+    hidden_layer1(LAYER_2), hidden_layer2(LAYER_3),
+    output_layer(LAYER_4),
+    weights_l12(LAYER_1, std::vector<double long>(LAYER_2)),
+    weights_l23(LAYER_2, std::vector<double long>(LAYER_3)),
+    weights_l34(LAYER_3, std::vector<double long>(LAYER_4)),
+    bias_l12(LAYER_2), bias_l23(LAYER_3), bias_l34(LAYER_4) {
   this -> initialize(true);
 }
 
 NeuralNet::~NeuralNet(void) {
-  for(size_t i = 0; i < input_layer.size(); ++i) {
+  for(size_t i = 0; i < LAYER_1; ++i) {
     delete input_layer[i];
     input_layer[i] = NULL;
   }
-  for(size_t i = 0; i < hidden_layer1.size(); ++i) {
+  for(size_t i = 0; i < LAYER_2; ++i) {
     delete hidden_layer1[i];
     hidden_layer1[i] = NULL;
   }
-  for(size_t i = 0; i < hidden_layer2.size(); ++i) {
+  for(size_t i = 0; i < LAYER_3; ++i) {
     delete hidden_layer2[i];
     hidden_layer2[i] = NULL;
   }
-  for(size_t i = 0; i < output_layer.size(); ++i) {
+  for(size_t i = 0; i < LAYER_4; ++i) {
     delete output_layer[i];
     output_layer[i] = NULL;
   }
@@ -76,66 +80,37 @@ NeuralNet::~NeuralNet(void) {
 // recombination; nets will consist of two
 // (or more) neual networks which 
 NeuralNet::NeuralNet(const std::vector<NeuralNet*> nets)
-  : input_layer(16), hidden_layer1(12),
-    hidden_layer2(8), fitness(1),
-    output_layer(4),
-    weights_l12(16, std::vector<double long>(12)),
-    weights_l23(12, std::vector<double long>(8)),
-    weights_l34(8, std::vector<double long>(4)),
-    bias_l12(12), bias_l23(8), bias_l34(4) {
-  for(size_t i = 0; i < 16; ++i) {
-    for(size_t j = 0; j < 12; ++j) {
-      if(static_cast<double>(rand())
-	 /static_cast<double>(RAND_MAX) <= 0.5) {
-	weights_l12[i][j] = nets[0] -> weights_l12[i][j];
-      } else {
-	weights_l12[i][j] = nets[1] -> weights_l12[i][j];
-      }
+  : input_layer(LAYER_1), hidden_layer1(LAYER_2),
+    hidden_layer2(LAYER_3), fitness(1),
+    output_layer(LAYER_4),
+    weights_l12(LAYER_1, std::vector<double long>(LAYER_2)),
+    weights_l23(LAYER_2, std::vector<double long>(LAYER_3)),
+    weights_l34(LAYER_3, std::vector<double long>(LAYER_4)),
+    bias_l12(LAYER_2), bias_l23(LAYER_3), bias_l34(LAYER_4) {
+  for(size_t i = 0; i < LAYER_1; ++i) {
+    for(size_t j = 0; j < LAYER_2; ++j) {
+      weights_l12[i][j] = nets[rand() % nets.size()] -> weights_l12[i][j];
     }
   }
-  for(size_t i = 0; i < 12; ++i) {
-    for(size_t j = 0; j < 8; ++j) {
-      if(static_cast<double>(rand())/
-	 static_cast<double>(RAND_MAX) <= 0.5) {
-	weights_l23[i][j] = nets[0] -> weights_l23[i][j];
-      } else {
-	weights_l23[i][j] = nets[1] -> weights_l23[i][j];
-      }
+  for(size_t i = 0; i < LAYER_2; ++i) {
+    for(size_t j = 0; j < LAYER_3; ++j) {
+      weights_l23[i][j] = nets[rand() % nets.size()] -> weights_l23[i][j];
     }
   }
-  for(size_t i = 0; i < 8; ++i) {
-    for(size_t j = 0; j < 4; ++j) {
-      if(static_cast<double>(rand())/
-	 static_cast<double>(RAND_MAX) <= 0.5) {
-	weights_l34[i][j] = nets[0] -> weights_l34[i][j];
-      } else {
-	weights_l34[i][j] = nets[1] -> weights_l34[i][j];
-      }
+  for(size_t i = 0; i < LAYER_3; ++i) {
+    for(size_t j = 0; j < LAYER_4; ++j) {
+      weights_l34[i][j] = nets[rand() % nets.size()] -> weights_l34[i][j];
     }
   }
-  for(size_t i = 0; i < 12; ++i) {
-    if(static_cast<double>(rand())/
-       static_cast<double>(RAND_MAX) <= 0.5) {
-      bias_l12[i] = nets[0] -> bias_l12[i];
-    } else {
-      bias_l12[i] = nets[1] -> bias_l12[i];
-    }
+  
+  for(size_t i = 0; i < LAYER_2; ++i) {
+    bias_l12[i] = nets[rand() % nets.size()] -> bias_l12[i];
   }
-  for(size_t i = 0; i < 8; ++i) {
-    if(static_cast<double>(rand())/
-       static_cast<double>(RAND_MAX) <= 0.5) {
-      bias_l23[i] = nets[0] -> bias_l23[i];
-    } else {
-      bias_l23[i] = nets[1] -> bias_l23[i];
-    }
+  for(size_t i = 0; i < LAYER_3; ++i) {
+    bias_l23[i] = nets[rand() % nets.size()] -> bias_l23[i];
   }
-  for(size_t i = 0; i < 4; ++i) {
-    if(static_cast<double>(rand())/
-       static_cast<double>(RAND_MAX) <= 0.5) {
-      bias_l34[i] = nets[0] -> bias_l34[i];
-    } else {
-      bias_l34[i] = nets[1] -> bias_l34[i];
-    }
+  for(size_t i = 0; i < LAYER_4; ++i) {
+    bias_l34[i] = nets[rand() % nets.size()] -> bias_l34[i];
   }
   
   this -> initialize(false);

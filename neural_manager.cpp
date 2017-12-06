@@ -4,8 +4,10 @@
 #include <vector>
 #include <iomanip>
 #include <fstream>
+#include <algorithm>
 
-#define NETWORK_CAPACITY 8
+#define NUM_FITTEST 5
+#define NETWORK_CAPACITY 80
 
 GeneticAlgorithm::GeneticAlgorithm(void) :
   networks(NETWORK_CAPACITY), games(NETWORK_CAPACITY),
@@ -15,6 +17,25 @@ GeneticAlgorithm::GeneticAlgorithm(void) :
     networks[i] = new NeuralNet;
     games[i] = new Grid;
     }*/
+}
+
+struct compare_fitness {
+  bool operator()(NeuralNet* & n1, NeuralNet* & n2) {
+    return n1 -> fitness < n2 -> fitness;
+  }
+} comp_func;
+
+void GeneticAlgorithm::sort_population(void) {
+  std::sort(networks.begin(), networks.end(), comp_func);
+}
+
+void GeneticAlgorithm::evaluate_fitness(void) {
+  for(size_t i = 0; i < NETWORK_CAPACITY; ++i) {
+    networks[i] -> fitness =
+      static_cast<double>(games[i] -> get_score())/
+      static_cast<double>(local_max_score);
+  }
+  GeneticAlgorithm::sort_population();
 }
 
 // destructor for the GA
@@ -45,23 +66,22 @@ void GeneticAlgorithm::new_generation(void) {
       networks[i] = new NeuralNet;
     }
   } else {
-    std::vector<NeuralNet*> nets(2);
-    nets[0] = networks[best_candidates[0]];
-    nets[1] = networks[best_candidates[1]];
+    std::vector<NeuralNet*> nets(NUM_FITTEST);
+    for(short i = 0; i < NUM_FITTEST; ++i) {
+      nets[i] = networks[NETWORK_CAPACITY - (i + 1)];
+    }
     // loops through and reproduces the neural
     // networks unless the index is the same as
     // that of the parents who's genes will be
     // copied and replicated
-    for(size_t i = 0; i < NETWORK_CAPACITY; ++i) {
-      if(i != best_candidates[0] &&
-	 i != best_candidates[1]) {
-	delete networks[i];
-	networks[i] = NULL;
-	networks[i] = new NeuralNet(nets);
-      }
+    for(size_t i = 0; i < NETWORK_CAPACITY - NUM_FITTEST; ++i) {
+      delete networks[i];
+      networks[i] = NULL;
+      networks[i] = new NeuralNet(nets);
     }
-    nets[0] = NULL;
-    nets[1] = NULL;
+    for(short i = 0; i < NUM_FITTEST; ++i) {
+      nets[i] = NULL;
+    }
   }
   GeneticAlgorithm::generate_new_games();
   ++generation;
@@ -124,7 +144,8 @@ void GeneticAlgorithm::select_best_candidates(void) {
 
 void GeneticAlgorithm::print_scores(void) const {
   for(short i = 0; i < NETWORK_CAPACITY; ++i) {
-    std::cerr << "Network-" << i << " - " << std::setw(6)
+    std::cerr << "Network-" << i << " - f: "<< std::setw(6)
+	      << networks[i] -> fitness << "\tscore: " << std::setw(6)
 	      << games[i] -> get_score() << "\n";
   }
 }
@@ -149,6 +170,7 @@ bool GeneticAlgorithm::train(void) {
       //std::cerr << "each of the networks played the game.\n";
       //GA::print_scores();
     }
+    GA::evaluate_fitness();
     max_score = local_max_score > max_score ? local_max_score : max_score;
     local_max_score = 0;
     std::cerr << "all of  the networks played the game:\n";
