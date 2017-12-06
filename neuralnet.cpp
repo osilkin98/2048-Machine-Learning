@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include <random>
 
-#define RAND_CONST 0.015
+#define RAND_CONST 0.0015
 #define LAYER_1 16
 #define LAYER_2 12
 #define LAYER_3 8

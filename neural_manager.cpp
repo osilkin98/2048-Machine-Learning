@@ -7,7 +7,7 @@
 #include <algorithm>
 
 #define NUM_FITTEST 5
-#define NETWORK_CAPACITY 80
+#define NETWORK_CAPACITY 150
 
 GeneticAlgorithm::GeneticAlgorithm(void) :
   networks(NETWORK_CAPACITY), games(NETWORK_CAPACITY),
