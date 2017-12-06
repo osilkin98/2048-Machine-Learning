@@ -3,18 +3,20 @@
 #include "neuron.h"
 
 class InputNeuron : public virtual Neuron{
- private:
-  long double value;
+  //private:
+  //long double value;
  public:
- InputNeuron(void) : value(0) { }
- InputNeuron(const long double val)
-   : value(val) { }
-
-  // basic I/O function
-  void input(const unsigned long value);
-
+ InputNeuron(void) : Neuron(0) { }
+ InputNeuron(const double long val)
+   : Neuron(val) { }
   
-  inline long double activation(void) const { return value; }
+  // basic I/O function
+  inline void input(const double long  val) { value = val; }
+  inline void input(const unsigned long val) {
+    value = static_cast<double long>(val);
+  }
+  
+  inline double long activation(void) const { return value; }
   
 };
 

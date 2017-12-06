@@ -23,6 +23,8 @@ class NeuralNet {
   std::vector<OutputNeuron*> output_layer;
 
  public:
+
+  double fitness;
   
   /**** weight vectors ****/
   // size=16x12
@@ -52,7 +54,7 @@ class NeuralNet {
 
   // member function to receive the current state
   // of a grid object and compute an output from {1,2,3,4}
-  short compute_output(Grid & game) const;
+  short compute_output(const Grid & game) const;
 
   void write_vector(std::ostream & outs,
 		    const std::vector<double long> & vec,

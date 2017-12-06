@@ -3,8 +3,8 @@
 #include "neuron.h"
 
 class HiddenNeuron : public virtual Neuron {
- private:
-  double long value;
+  //private:
+  //double long value;
  public:
   HiddenNeuron(void);
   HiddenNeuron(const double long val);

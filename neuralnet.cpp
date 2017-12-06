@@ -6,8 +6,9 @@
 #define RAND_CONST 0.15
 
 NeuralNet::NeuralNet(void)
-  : input_layer(16), hidden_layer1(12),
-    hidden_layer2(8), output_layer(4),
+  : fitness(1), input_layer(16),
+    hidden_layer1(12), hidden_layer2(8),
+    output_layer(4),
     weights_l12(16, std::vector<double long>(12)),
     weights_l23(12, std::vector<double long>(8)),
     weights_l34(8, std::vector<double long>(4)),
@@ -32,6 +33,7 @@ NeuralNet::~NeuralNet(void) {
     delete output_layer[i];
     output_layer[i] = NULL;
   }
+  /*
   input_layer.clear();
   input_layer.swap(std::vector<InputNeuron*>(input_layer));
   hidden_layer1.clear();
@@ -67,6 +69,7 @@ NeuralNet::~NeuralNet(void) {
   bias_l23.swap(std::vector<dl>(bias_l23));
   bias_l34.clear();
   bias_l34.swap(std::vector<dl>(bias_l34));
+  */
 }
 
 // this constructor is for the purpose of
@@ -74,7 +77,8 @@ NeuralNet::~NeuralNet(void) {
 // (or more) neual networks which 
 NeuralNet::NeuralNet(const std::vector<NeuralNet*> nets)
   : input_layer(16), hidden_layer1(12),
-    hidden_layer2(8), output_layer(4),
+    hidden_layer2(8), fitness(1),
+    output_layer(4),
     weights_l12(16, std::vector<double long>(12)),
     weights_l23(12, std::vector<double long>(8)),
     weights_l34(8, std::vector<double long>(4)),
@@ -98,7 +102,7 @@ NeuralNet::NeuralNet(const std::vector<NeuralNet*> nets)
 	weights_l23[i][j] = nets[1] -> weights_l23[i][j];
       }
     }
-  }https://www.reddit.com/r/ihavesex/comments/7fhe8y/this_guy_fucks/
+  }
   for(size_t i = 0; i < 8; ++i) {
     for(size_t j = 0; j < 4; ++j) {
       if(static_cast<double>(rand())/
@@ -241,7 +245,7 @@ void NeuralNet::mutate(double const
   }
 }
 
-short NeuralNet::compute_output(Grid & game) const{
+short NeuralNet::compute_output(const Grid & game) const{
   //std::cerr << "computing output for input layer.\n";
   // to set the values for each input neuron
   for(size_t i = 0; i < game.board_size(); ++i) {

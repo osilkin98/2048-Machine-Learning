@@ -3,9 +3,9 @@
 #include <cmath>
 
 HiddenNeuron::HiddenNeuron(void)
-  : value(pow(-1, rand()) * static_cast<double>(rand())/static_cast<double>(RAND_MAX)){}
+  : Neuron(pow(-1, rand()) * static_cast<double>(rand())/static_cast<double>(RAND_MAX)){}
 
-HiddenNeuron::HiddenNeuron(const double long val) : value(val) { }
+HiddenNeuron::HiddenNeuron(const double long val) : Neuron(val) { }
 
 inline void HiddenNeuron::input(double long val) { value = val; }
 

@@ -2,15 +2,15 @@
 #define NEURON_H
 
 class Neuron {
- private:
+ protected:
   double long value;
  public:
-  Neuron(void);
-  //Neuron(const double long val);
+ Neuron(void) : value(0) {} 
+ Neuron(const double long val) : value(val) {}
+ 
+  virtual double long activation(void) const = 0;
 
-  virtual double long activation(void) const =0;
-
-  virtual void input(double long val);
+  virtual void input(const double long val) = 0;
 };
 
 
