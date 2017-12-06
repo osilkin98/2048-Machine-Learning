@@ -41,7 +41,9 @@ class GeneticAlgorithm {
   std::vector<NeuralNet*> networks;
   std::vector<Grid*> games;
   std::vector<size_t> best_candidates;
-  unsigned long max_score, generation;
+  unsigned long max_score,
+    local_max_score ,
+    generation;
  public:
   GeneticAlgorithm(void);
   ~GeneticAlgorithm(void);
@@ -52,7 +54,7 @@ class GeneticAlgorithm {
   }
 
   void new_generation(void);
-
+  void print_scores(void) const;
   bool play_game(NeuralNet * & test_net,
 		 Grid * & game, const size_t i);
   

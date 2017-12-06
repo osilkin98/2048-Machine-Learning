@@ -9,7 +9,8 @@
 
 GeneticAlgorithm::GeneticAlgorithm(void) :
   networks(NETWORK_CAPACITY), games(NETWORK_CAPACITY),
-  max_score(0), best_candidates(2, 8), generation(0) {
+  max_score(0), best_candidates(2, 8), generation(0),
+  local_max_score(0) {
   /*for(short i = 0; i < NETWORK_CAPACITY; ++i) {
     networks[i] = new NeuralNet;
     games[i] = new Grid;
@@ -89,23 +90,42 @@ bool GeneticAlgorithm::play_game(NeuralNet * & curr,
     }
     // if the score attained from this algorithm is
     // better than the current highest score, replace it
-    if(game -> get_score() > max_score) {
-      max_score = game -> get_score();
+    if(game -> get_score() >= local_max_score) {
+      local_max_score = game -> get_score();
       best_candidates[0] = i;
     }
   }
   infile.close();
 }
-// 
+
+// chooses the best candidates to produce the next gen
 void GeneticAlgorithm::select_best_candidates(void) {
-  unsigned long second_score = games[0] -> get_score();
-  for(size_t i = 1; i < NETWORK_CAPACITY; ++i) {
+  unsigned long second_score = 0;
+  //best_candidates[1] = 0;
+  for(size_t i = 0; i < NETWORK_CAPACITY; ++i) {
     // to find the second fittest candidate in our set
-    if(second_score < games[i] -> get_score() &&
+
+    // if the second greatest score is less than
+    // the score of the current element, and the current
+    // element is not the same as the first one,
+    if(second_score <= games[i] -> get_score() &&
        i != best_candidates[0]) {
+
+      // then update the second score to be equal to
+      // that of what was just discovered
       second_score = games[i] -> get_score();
+
+      // and change the index of the 2nd best candidate
+      // to be the index of the current score
       best_candidates[1] = i;
     }
+  }
+}
+
+void GeneticAlgorithm::print_scores(void) const {
+  for(short i = 0; i < NETWORK_CAPACITY; ++i) {
+    std::cerr << "Network-" << i << " - " << std::setw(6)
+	      << games[i] -> get_score() << "\n";
   }
 }
 
@@ -114,17 +134,36 @@ void GeneticAlgorithm::select_best_candidates(void) {
 bool GeneticAlgorithm::train(void) {
   typedef GeneticAlgorithm GA;
   while(!critereon(max_score)) {
+
     GA::new_generation();
+
     std::cerr << "created new generation on iteration " << generation << "\n";
+
     for(size_t i = 0; i < NETWORK_CAPACITY; ++i) {
+
       // each new neural network generated must play
       // their corresponding instance of a 2048 game
       GA::play_game(networks[i], games[i], i);
+
+
+      //std::cerr << "each of the networks played the game.\n";
+      //GA::print_scores();
     }
+    max_score = local_max_score > max_score ? local_max_score : max_score;
+    local_max_score = 0;
+    std::cerr << "all of  the networks played the game:\n";
+    GA::print_scores();
     // the genetic algorithm then selects the best
     // candidates to be reproduced in the next generation
     GA::select_best_candidates();
-    std::cerr << "iteration[" << generation << "]\t"
+    
+    std::cerr << "1st score [network-" << best_candidates[0]
+	      << "]: " << std::setw(6)
+	      << games[best_candidates[0]] -> get_score()
+	      << "\n2nd score[network-" << best_candidates[1]
+	      << ": " << std::setw(6)
+	      << games[best_candidates[1]] -> get_score()
+	      << "\niteration[" << generation << "]\t"
 	      << "maximum value attained: " << std::setw(12)
 	      << max_score << "\n\n";
   }
