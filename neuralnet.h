@@ -25,7 +25,7 @@ class NeuralNet {
  public:
 
   double fitness;
-  
+  bool stuck;
   /**** weight vectors ****/
   // size=16x12
   std::vector< std::vector<double long> > weights_l12;
@@ -44,7 +44,7 @@ class NeuralNet {
   void initialize(bool);
   //short identifier;
   NeuralNet(void);
-  NeuralNet(const std::vector<NeuralNet*> nets);
+  NeuralNet(const std::vector<NeuralNet*> & nets);
   // this is going to be called whenever the
   // current neural network is going to be kicked out
   // of its current population

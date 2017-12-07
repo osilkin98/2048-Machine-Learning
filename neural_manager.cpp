@@ -5,9 +5,10 @@
 #include <iomanip>
 #include <fstream>
 #include <algorithm>
+#include <string> 
 
-#define NUM_FITTEST 5
-#define NETWORK_CAPACITY 80
+#define NUM_FITTEST 2
+#define NETWORK_CAPACITY 150
 
 GeneticAlgorithm::GeneticAlgorithm(void) :
   networks(NETWORK_CAPACITY), games(NETWORK_CAPACITY),
@@ -25,8 +26,15 @@ struct compare_fitness {
   }
 } comp_func;
 
+struct compare_score {
+  bool operator()(Grid* & c1, Grid* & c2) {
+    return c1 -> get_score() < c2 -> get_score();
+  }
+} score_comp;
+
 void GeneticAlgorithm::sort_population(void) {
   std::sort(networks.begin(), networks.end(), comp_func);
+  std::sort(games.begin(), games.end(), score_comp);
 }
 
 void GeneticAlgorithm::evaluate_fitness(void) {
@@ -60,7 +68,10 @@ void GeneticAlgorithm::generate_new_games(void) {
   }
 }
 
+// creates a new generation for the next iteration
 void GeneticAlgorithm::new_generation(void) {
+  // if we're only on the first generation then we can just
+  // instantiate it normally 
   if(generation == 0) {
     for(size_t i = 0; i < NETWORK_CAPACITY; ++i) {
       networks[i] = new NeuralNet;
@@ -68,6 +79,10 @@ void GeneticAlgorithm::new_generation(void) {
   } else {
     std::vector<NeuralNet*> nets(NUM_FITTEST);
     for(short i = 0; i < NUM_FITTEST; ++i) {
+      std::cerr << "fitness of network["
+		<< NETWORK_CAPACITY-(i+1) << "]: "
+		<< networks[NETWORK_CAPACITY - (i + 1)] -> fitness
+		<< "\nScores";
       nets[i] = networks[NETWORK_CAPACITY - (i + 1)];
     }
     // loops through and reproduces the neural
@@ -102,6 +117,7 @@ bool GeneticAlgorithm::play_game(NeuralNet * & curr,
 	// changing, there is nothing more that the neural network
 	// can do. therefore we should exit the loop
 	// and move onto  the next.
+	curr -> stuck = true;
 	break;
       }
       // place a new tile after the game itself has taken a new turn
@@ -144,7 +160,8 @@ void GeneticAlgorithm::select_best_candidates(void) {
 
 void GeneticAlgorithm::print_scores(void) const {
   for(short i = 0; i < NETWORK_CAPACITY; ++i) {
-    std::cerr << "Network-" << i << " - f: "<< std::setw(6)
+    std::string status = networks[i] -> stuck ? "[STUCK] " : "[FINISHED] ";
+    std::cerr << status << "Network-" << i << " - f: "<< std::setw(6)
 	      << networks[i] -> fitness << "\tscore: " << std::setw(6)
 	      << games[i] -> get_score() << "\n";
   }
@@ -155,7 +172,7 @@ void GeneticAlgorithm::print_scores(void) const {
 bool GeneticAlgorithm::train(void) {
   typedef GeneticAlgorithm GA;
   while(!critereon(max_score)) {
-
+    local_max_score = 0;
     GA::new_generation();
 
     std::cerr << "created new generation on iteration " << generation << "\n";

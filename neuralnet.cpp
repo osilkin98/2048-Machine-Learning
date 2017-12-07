@@ -10,7 +10,7 @@
 #define LAYER_4 4
 
 NeuralNet::NeuralNet(void)
-  : fitness(1), input_layer(LAYER_1),
+  : stuck(false), fitness(1), input_layer(LAYER_1),
     hidden_layer1(LAYER_2), hidden_layer2(LAYER_3),
     output_layer(LAYER_4),
     weights_l12(LAYER_1, std::vector<double long>(LAYER_2)),
@@ -79,14 +79,15 @@ NeuralNet::~NeuralNet(void) {
 // this constructor is for the purpose of
 // recombination; nets will consist of two
 // (or more) neual networks which 
-NeuralNet::NeuralNet(const std::vector<NeuralNet*> nets)
-  : input_layer(LAYER_1), hidden_layer1(LAYER_2),
+NeuralNet::NeuralNet(const std::vector<NeuralNet*> & nets)
+  : stuck(false), input_layer(LAYER_1), hidden_layer1(LAYER_2),
     hidden_layer2(LAYER_3), fitness(1),
     output_layer(LAYER_4),
     weights_l12(LAYER_1, std::vector<double long>(LAYER_2)),
     weights_l23(LAYER_2, std::vector<double long>(LAYER_3)),
     weights_l34(LAYER_3, std::vector<double long>(LAYER_4)),
     bias_l12(LAYER_2), bias_l23(LAYER_3), bias_l34(LAYER_4) {
+  /*
   for(size_t i = 0; i < LAYER_1; ++i) {
     for(size_t j = 0; j < LAYER_2; ++j) {
       weights_l12[i][j] = nets[rand() % nets.size()] -> weights_l12[i][j];
@@ -111,10 +112,148 @@ NeuralNet::NeuralNet(const std::vector<NeuralNet*> nets)
   }
   for(size_t i = 0; i < LAYER_4; ++i) {
     bias_l34[i] = nets[rand() % nets.size()] -> bias_l34[i];
+    }*/
+
+  // let's assume that we only have two parents
+  // if we only hav
+  size_t i = 0, j = 0, p1 = 0, p2 = 0;
+  //std::cerr << "recombining\n";
+  p1 = rand() % 2;
+  p2 = (p1 + 1) % 2;
+  j = rand() % (LAYER_2);
+  i = rand() % (LAYER_2 - 1);
+  
+  while(j < i) {
+    j = rand() % LAYER_2;
   }
+
+  for(size_t k = 0; k < i; ++k) {
+    bias_l12[k] = nets[p1] -> bias_l12[k];
+  }
+  for(size_t k = i; k < j; ++k) {
+    bias_l12[k] = nets[p2] -> bias_l12[k];
+  }
+  for(size_t k = j; k < LAYER_2; ++k) {
+    bias_l12[k] = nets[p1] -> bias_l12[k];
+  }
+  //std::cerr << "past the first bias vector\n";
+  p1 = rand() % 2;
+  p2 = (rand() + 1) % 2;
+  j = rand() % (LAYER_3);
+  i = rand() % (LAYER_3 - 1);
+  while(j < i) {
+    j = rand() % LAYER_3;
+  }
+  for(size_t k = 0; k < i; ++k) {
+    bias_l23[k] = nets[p1] -> bias_l23[k];
+  }
+  for(size_t k = i; k < j; ++k) {
+    bias_l23[k] = nets[p2] -> bias_l23[k];
+  }
+  for(size_t k = j; k < LAYER_3; ++k) {
+    bias_l23[k] = nets[p1] -> bias_l23[k];
+  }
+  //std::cerr << "past the second\n";
+  j = rand() % (LAYER_4);
+  i = rand() % (LAYER_4 - 1);
+  p1 = rand() % 2;
+  p2 = (rand() + 1) % 2;
+  while(j < i) {
+    j = rand() % LAYER_4;
+  }
+  for(size_t k = 0; k < i; ++k) {
+    bias_l34[k] = nets[p1] -> bias_l34[k];
+  }
+  for(size_t k = i; k < j; ++k) {
+    bias_l34[k] = nets[p2] -> bias_l34[k];
+  }
+  for(size_t k = j; k < LAYER_4; ++k) {
+    bias_l34[k] = nets[p1] -> bias_l34[k];
+  }
+
+  
+  j = rand() % (LAYER_1);
+  i = rand() % (LAYER_1 - 1);
+  p1 = rand() % 2;
+  p2 = (rand() + 1) % 2;
+
+  while(j < i) {
+    j = rand() % LAYER_1;
+  }
+
+  //std::cerr << "attempting to splice the weight matrices\n";
+  
+  for(size_t k = 0; k < i; ++k) {
+    for(size_t t = 0; t < LAYER_2; ++t) {
+      weights_l12[k][t] = nets[p1] -> weights_l12[k][t];
+    }
+  }
+  for(size_t k = i; k < j; ++k) {
+    for(size_t t = 0; t < LAYER_2; ++t) {
+      weights_l12[k][t] = nets[p2] -> weights_l12[k][t];
+    }
+  }
+  for(size_t k = j; k < LAYER_1; ++k) {
+    for(size_t t = 0; t < LAYER_2; ++t) {
+      weights_l12[k][t] = nets[p1] -> weights_l12[k][t];
+    }
+  }
+  
+  
+  j = rand() % (LAYER_2);
+  i = rand() % (LAYER_2 - 1);
+  p1 = rand() % 2;
+  p2 = (rand() + 1) % 2;
+
+  while(j < i) {
+    j = rand() % LAYER_2;
+  }
+  for(size_t k = 0; k < i; ++k) {
+    for(size_t t = 0; t < LAYER_3; ++t) {
+      weights_l23[k][t] = nets[p1] -> weights_l23[k][t];
+    }
+  }
+  for(size_t k = i; k < j; ++k) {
+    for(size_t t = 0; t < LAYER_3; ++t) {
+      weights_l23[k][t] = nets[p2] -> weights_l23[k][t];
+    }
+  }
+  for(size_t k = j; k < LAYER_2; ++k) {
+    for(size_t t = 0; t < LAYER_3; ++t) {
+      weights_l23[k][t] = nets[p1] -> weights_l23[k][t];
+    }
+  }
+  
+  
+  
+  j = rand() % (LAYER_3);
+  i = rand() % (LAYER_3 - 1);
+  p1 = rand() % 2;
+  p2 = (rand() + 1) % 2;
+
+  while(j < i) {
+    j = rand() % LAYER_3;
+  }
+  for(size_t k = 0; k < i; ++k) {
+    for(size_t t = 0; t < LAYER_4; ++t) {
+      weights_l34[k][t] = nets[p1] -> weights_l34[k][t];
+    }
+  }
+  for(size_t k = i; k < j; ++k) {
+    for(size_t t = 0; t < LAYER_4; ++t) {
+      weights_l34[k][t] = nets[p2] -> weights_l34[k][t];
+    }
+  }
+  for(size_t k = j; k < LAYER_3; ++k) {
+    for(size_t t = 0; t < LAYER_4; ++t) {
+      weights_l34[k][t] = nets[p1] -> weights_l34[k][t];
+    }
+  }
+  
   
   this -> initialize(false);
 }
+
 
 // to initialize the neural network
 void NeuralNet::initialize(bool is_new = true) {
