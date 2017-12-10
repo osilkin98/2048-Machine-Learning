@@ -10,7 +10,7 @@
 #define LAYER_4 4
 
 NeuralNet::NeuralNet(void)
-  : stuck(false), fitness(1), input_layer(LAYER_1),
+  : turns(0), stuck(false), fitness(1), input_layer(LAYER_1),
     hidden_layer1(LAYER_2), hidden_layer2(LAYER_3),
     output_layer(LAYER_4),
     weights_l12(LAYER_1, std::vector<double long>(LAYER_2)),
@@ -81,7 +81,7 @@ NeuralNet::~NeuralNet(void) {
 // (or more) neual networks which 
 NeuralNet::NeuralNet(const std::vector<NeuralNet*> & nets)
   : stuck(false), input_layer(LAYER_1), hidden_layer1(LAYER_2),
-    hidden_layer2(LAYER_3), fitness(1),
+    hidden_layer2(LAYER_3), fitness(1), turns(0),
     output_layer(LAYER_4),
     weights_l12(LAYER_1, std::vector<double long>(LAYER_2)),
     weights_l23(LAYER_2, std::vector<double long>(LAYER_3)),
@@ -314,7 +314,7 @@ void NeuralNet::initialize(bool is_new = true) {
 void NeuralNet::mutate(double const
 		       rand_const = RAND_CONST) {
   std::default_random_engine generator(time(0));
-  std::normal_distribution<double long> norm_dist(0.0, 2.0);
+  std::normal_distribution<double long> norm_dist(0.0, 5.0);
   for(size_t i = 0; i < weights_l12.size(); ++i) {
     for(size_t j = 0; j < weights_l12[i].size(); ++j) {
       if(static_cast<double>(rand())/
