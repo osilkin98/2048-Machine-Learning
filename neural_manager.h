@@ -43,7 +43,9 @@ class GeneticAlgorithm {
   std::vector<size_t> best_candidates;
   unsigned long max_score,
     local_max_score ,
-    generation;
+    generation,
+    local_max_turns,
+    max_turns;
  public:
   GeneticAlgorithm(void);
   ~GeneticAlgorithm(void);
