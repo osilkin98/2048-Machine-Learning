@@ -24,6 +24,11 @@ class NeuralNet {
 
  public:
 
+  // the turns variable keeps count of how many turns
+  // the neural network has taken
+  // which allows us to calculate how well it actually
+  // performs
+  unsigned long turns;
   double fitness;
   bool stuck;
   /**** weight vectors ****/
