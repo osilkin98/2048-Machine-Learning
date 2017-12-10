@@ -8,40 +8,48 @@
 #include <string> 
 
 #define NUM_FITTEST 2
-#define NETWORK_CAPACITY 150
+#define NETWORK_CAPACITY 80
 
 GeneticAlgorithm::GeneticAlgorithm(void) :
   networks(NETWORK_CAPACITY), games(NETWORK_CAPACITY),
   max_score(0), best_candidates(2, 8), generation(0),
-  local_max_score(0) {
+  local_max_score(0), local_max_turns(0), max_turns(0) {
   /*for(short i = 0; i < NETWORK_CAPACITY; ++i) {
     networks[i] = new NeuralNet;
     games[i] = new Grid;
     }*/
 }
 
+// just a basic struct to compare the fitness values between
+// two different neural networks regardless of defined function
 struct compare_fitness {
   bool operator()(NeuralNet* & n1, NeuralNet* & n2) {
     return n1 -> fitness < n2 -> fitness;
   }
 } comp_func;
 
+
+// stupid useless struct - needs to get the fuck out of here
 struct compare_score {
   bool operator()(Grid* & c1, Grid* & c2) {
     return c1 -> get_score() < c2 -> get_score();
   }
 } score_comp;
 
+// sorts the neural networks from lowest to highest in terms
+// of fitness value
 void GeneticAlgorithm::sort_population(void) {
+  // since the fitness function just compares the turns taken
   std::sort(networks.begin(), networks.end(), comp_func);
-  std::sort(games.begin(), games.end(), score_comp);
+  // let's just not sort it by score because it'll be misleading
+  //std::sort(games.begin(), games.end(), score_comp);
 }
 
 void GeneticAlgorithm::evaluate_fitness(void) {
   for(size_t i = 0; i < NETWORK_CAPACITY; ++i) {
     networks[i] -> fitness =
-      static_cast<double>(games[i] -> get_score())/
-      static_cast<double>(local_max_score);
+      static_cast<double>(networks[i] -> turns)/
+      static_cast<double>(max_turns);
   }
   GeneticAlgorithm::sort_population();
 }
@@ -104,9 +112,10 @@ void GeneticAlgorithm::new_generation(void) {
 
 bool GeneticAlgorithm::play_game(NeuralNet * & curr,
 				 Grid * & game, const size_t i) {
-  short move = 0;
   std::ifstream infile("data.txt");
   if(infile) {
+    short move = 0;
+    unsigned long current_turns = 0;
     short next_val = 0;
     // while the tiles on the board can be merged in some way
     while(game -> has_merge()) {
@@ -117,9 +126,11 @@ bool GeneticAlgorithm::play_game(NeuralNet * & curr,
 	// changing, there is nothing more that the neural network
 	// can do. therefore we should exit the loop
 	// and move onto  the next.
+	curr -> turns = current_turns;
 	curr -> stuck = true;
 	break;
       }
+      ++current_turns;
       // place a new tile after the game itself has taken a new turn
       infile >> next_val;
       game -> place_tile(next_val);
@@ -128,7 +139,10 @@ bool GeneticAlgorithm::play_game(NeuralNet * & curr,
     // better than the current highest score, replace it
     if(game -> get_score() >= local_max_score) {
       local_max_score = game -> get_score();
-      best_candidates[0] = i;
+      ///best_candidates[0] = i;
+    }
+    if(current_turns > local_max_turns) {
+      local_max_turns = current_turns;
     }
   }
   infile.close();
@@ -136,7 +150,7 @@ bool GeneticAlgorithm::play_game(NeuralNet * & curr,
 
 // chooses the best candidates to produce the next gen
 void GeneticAlgorithm::select_best_candidates(void) {
-  unsigned long second_score = 0;
+  /*unsigned long second_score = 0;
   //best_candidates[1] = 0;
   for(size_t i = 0; i < NETWORK_CAPACITY; ++i) {
     // to find the second fittest candidate in our set
@@ -155,16 +169,27 @@ void GeneticAlgorithm::select_best_candidates(void) {
       // to be the index of the current score
       best_candidates[1] = i;
     }
+    }*/
+  // the num fittest here will always be two
+  // for the sake of the current recombination
+  // algorithm
+  for(size_t i = 0; i < NUM_FITTEST; ++i) {
+    best_candidates[i] = NETWORK_CAPACITY - (i + 1);
   }
 }
 
 void GeneticAlgorithm::print_scores(void) const {
   for(short i = 0; i < NETWORK_CAPACITY; ++i) {
     std::string status = networks[i] -> stuck ? "[STUCK] " : "[FINISHED] ";
-    std::cerr << status << "Network-" << i << " - f: "<< std::setw(6)
-	      << networks[i] -> fitness << "\tscore: " << std::setw(6)
-	      << games[i] -> get_score() << "\n";
+    std::cerr << status << "Network-" << i << " - f: "
+	      << std::setw(6)
+	      << networks[i] -> fitness << "\tscore: "
+	      << std::setw(6)
+	      << games[i] -> get_score() << "\tturns: "
+	      << networks[i] -> turns << "\n";
+    
   }
+  std::cerr << "\n\n";
 }
 
 // serves as the real main function to the
@@ -172,7 +197,10 @@ void GeneticAlgorithm::print_scores(void) const {
 bool GeneticAlgorithm::train(void) {
   typedef GeneticAlgorithm GA;
   while(!critereon(max_score)) {
+    // reset local maximums
     local_max_score = 0;
+    local_max_turns = 0;
+    // instantiate a new generation of neural networks
     GA::new_generation();
 
     std::cerr << "created new generation on iteration " << generation << "\n";
@@ -187,9 +215,11 @@ bool GeneticAlgorithm::train(void) {
       //std::cerr << "each of the networks played the game.\n";
       //GA::print_scores();
     }
+    max_turns = local_max_turns > max_turns ? local_max_turns : max_turns;
     GA::evaluate_fitness();
     max_score = local_max_score > max_score ? local_max_score : max_score;
-    local_max_score = 0;
+    
+    
     std::cerr << "all of  the networks played the game:\n";
     GA::print_scores();
     // the genetic algorithm then selects the best
@@ -200,11 +230,12 @@ bool GeneticAlgorithm::train(void) {
 	      << "]: " << std::setw(6)
 	      << games[best_candidates[0]] -> get_score()
 	      << "\n2nd score[network-" << best_candidates[1]
-	      << ": " << std::setw(6)
+	      << "]: " << std::setw(6)
 	      << games[best_candidates[1]] -> get_score()
 	      << "\niteration[" << generation << "]\t"
-	      << "maximum value attained: " << std::setw(12)
-	      << max_score << "\n\n";
+	      << "maximum value attained: "<< max_score << std::setw(10)
+	      << "\nMaximum turns reached: " << std::setw(5)
+	      << max_turns << "\n\n";
   }
   if(!(networks[best_candidates[0]] -> dump_values())) {
     std::cerr << "[CRITICAL ERROR]: Neural network failed "
