@@ -8,7 +8,7 @@
 #include <string> 
 
 #define NUM_FITTEST 2
-#define NETWORK_CAPACITY 80
+#define NETWORK_CAPACITY 150
 
 GeneticAlgorithm::GeneticAlgorithm(void) :
   networks(NETWORK_CAPACITY), games(NETWORK_CAPACITY),
@@ -24,12 +24,12 @@ GeneticAlgorithm::GeneticAlgorithm(void) :
 // two different neural networks regardless of defined function
 struct compare_fitness {
   bool operator()(NeuralNet* & n1, NeuralNet* & n2) {
-    return n1 -> fitness < n2 -> fitness;
+    return n1 -> score < n2 -> score;
   }
 } comp_func;
 
 
-// stupid useless struct - needs to get the fuck out of here
+// obsolete
 struct compare_score {
   bool operator()(Grid* & c1, Grid* & c2) {
     return c1 -> get_score() < c2 -> get_score();
@@ -45,18 +45,20 @@ void GeneticAlgorithm::sort_population(void) {
   //std::sort(games.begin(), games.end(), score_comp);
 }
 
+
+// evaluates the fitness based on the maximum score attained
 void GeneticAlgorithm::evaluate_fitness(void) {
-  for(size_t i = 0; i < NETWORK_CAPACITY; ++i) {
+  for(register size_t i = 0; i < NETWORK_CAPACITY; ++i) {
     networks[i] -> fitness =
-      static_cast<double>(networks[i] -> turns)/
-      static_cast<double>(max_turns);
+      static_cast<double>(networks[i] -> score)/
+      static_cast<double>(max_score);
   }
   GeneticAlgorithm::sort_population();
 }
 
 // destructor for the GA
 GeneticAlgorithm::~GeneticAlgorithm(void) {
-  for(size_t i = 0; i < NETWORK_CAPACITY; ++i) {
+  for(register size_t i = 0; i < NETWORK_CAPACITY; ++i) {
     delete networks[i];
     networks[i] = NULL;
     delete games[i];
@@ -67,7 +69,7 @@ GeneticAlgorithm::~GeneticAlgorithm(void) {
 void GeneticAlgorithm::generate_new_games(void) {
   // delete old games and instatiate them with
   // new ones.
-  for(size_t i = 0; i < NETWORK_CAPACITY; ++i) {
+  for(register size_t i = 0; i < NETWORK_CAPACITY; ++i) {
     if(games[i] != NULL) {
       delete games[i];
       games[i] = NULL;
@@ -81,7 +83,7 @@ void GeneticAlgorithm::new_generation(void) {
   // if we're only on the first generation then we can just
   // instantiate it normally 
   if(generation == 0) {
-    for(size_t i = 0; i < NETWORK_CAPACITY; ++i) {
+    for(register size_t i = 0; i < NETWORK_CAPACITY; ++i) {
       networks[i] = new NeuralNet;
     }
   } else {
@@ -97,7 +99,7 @@ void GeneticAlgorithm::new_generation(void) {
     // networks unless the index is the same as
     // that of the parents who's genes will be
     // copied and replicated
-    for(size_t i = 0; i < NETWORK_CAPACITY - NUM_FITTEST; ++i) {
+    for(register size_t i = 0; i < NETWORK_CAPACITY - NUM_FITTEST; ++i) {
       delete networks[i];
       networks[i] = NULL;
       networks[i] = new NeuralNet(nets);
@@ -135,6 +137,8 @@ bool GeneticAlgorithm::play_game(NeuralNet * & curr,
       infile >> next_val;
       game -> place_tile(next_val);
     }
+    curr -> score = game -> get_score();
+    
     // if the score attained from this algorithm is
     // better than the current highest score, replace it
     if(game -> get_score() >= local_max_score) {
@@ -173,7 +177,7 @@ void GeneticAlgorithm::select_best_candidates(void) {
   // the num fittest here will always be two
   // for the sake of the current recombination
   // algorithm
-  for(size_t i = 0; i < NUM_FITTEST; ++i) {
+  for(register size_t i = 0; i < NUM_FITTEST; ++i) {
     best_candidates[i] = NETWORK_CAPACITY - (i + 1);
   }
 }
@@ -236,6 +240,8 @@ bool GeneticAlgorithm::train(void) {
 	      << "maximum value attained: "<< max_score << std::setw(10)
 	      << "\nMaximum turns reached: " << std::setw(5)
 	      << max_turns << "\n\n";
+    // for debugging
+    getchar();
   }
   if(!(networks[best_candidates[0]] -> dump_values())) {
     std::cerr << "[CRITICAL ERROR]: Neural network failed "

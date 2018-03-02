@@ -10,7 +10,7 @@
 #define LAYER_4 4
 
 NeuralNet::NeuralNet(void)
-  : turns(0), stuck(false), fitness(1), input_layer(LAYER_1),
+:   score(0), turns(0), stuck(false), fitness(1), input_layer(LAYER_1),
     hidden_layer1(LAYER_2), hidden_layer2(LAYER_3),
     output_layer(LAYER_4),
     weights_l12(LAYER_1, std::vector<double long>(LAYER_2)),

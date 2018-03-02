@@ -28,9 +28,11 @@ class NeuralNet {
   // the neural network has taken
   // which allows us to calculate how well it actually
   // performs
-  unsigned long turns;
+  
+  unsigned long turns, score;
   double fitness;
   bool stuck;
+  
   /**** weight vectors ****/
   // size=16x12
   std::vector< std::vector<double long> > weights_l12;
