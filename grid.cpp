@@ -40,9 +40,11 @@ Grid::Grid(void) : board(4, std::vector<Tile*>(4)), active_tiles(0), score(0) {
   board_init();
 }
 
+
+// has a 1/10 chance of placing a 4 tile
 void Grid::place_tile(void) {
   place_tile(static_cast<double>(rand()) /
-	     static_cast<double>(RAND_MAX) <= 0.25 ?
+	     static_cast<double>(RAND_MAX) <= 0.1 ?
 	     4 : 2);
 }
 
@@ -93,6 +95,7 @@ bool Grid::take_turn(const short c) {
   }
 }
 
+
 Grid::Grid(const size_t board_size)
   : board(board_size, std::vector<Tile*>(board_size)),
     active_tiles(0), score(0) {
@@ -140,6 +143,7 @@ void Grid::print(std::ostream & outs) const {
   outs << board_str.str() << std::endl;
 }
 
+// clear the merged status for all the tiles 
 void Grid::unmerge(void) {
   for(size_t row = 0; row < board.size(); ++row) {
     for(size_t col = 0; col < board[row].size(); ++col) {
@@ -152,6 +156,7 @@ void Grid::unmerge(void) {
   }
 }
 
+// shift tiles to the right
 bool Grid::shift_right(void) {
   bool shifted = false;
   for(ssize_t i = 0; i < board.size(); ++i) {
